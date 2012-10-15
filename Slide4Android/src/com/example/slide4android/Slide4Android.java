@@ -5,6 +5,7 @@ import com.hiputto.common4android.superclass.HP_BaseActivity;
 import com.hiputto.common4android.util.HP_AnimationUtils;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -23,7 +24,7 @@ public class Slide4Android extends HP_BaseActivity {
 
 	private VelocityTracker mVelocityTracker;
 	private int startTouchMotionX;
-	private int lastTouchMotionX;
+	private int lastTouchMotionX = 0;
 	private boolean isSliding = false;
 	private boolean hasSlidedRight = false;
 	private int remainingSlidedAreaWidth = 100;
@@ -32,26 +33,26 @@ public class Slide4Android extends HP_BaseActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		remainingSlidedAreaWidth = getScreenWidth()/2;
-		
+		remainingSlidedAreaWidth = getScreenWidth() / 2;
+
 		menuLayout = (LinearLayout) findViewById(R.id.menu_layout);
 		mainLayout = (LinearLayout) findViewById(R.id.main_layout);
 
 		button = (Button) mainLayout.getChildAt(0);
-		
+
 		button.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View arg0) {
-				if(hasSlidedRight){
+				if (hasSlidedRight) {
 					doLeftSlide();
-				}else{
+				} else {
 					doRightSlide();
 				}
-				
+
 			}
 		});
-		
+
 		mainLayout.setOnTouchListener(new OnTouchListener() {
 			@Override
 			public boolean onTouch(View view, MotionEvent event) {
@@ -70,23 +71,24 @@ public class Slide4Android extends HP_BaseActivity {
 					startTouchMotionX = x;
 					break;
 				case MotionEvent.ACTION_MOVE:
-//					mVelocityTracker.computeCurrentVelocity(1000, 1000);
-//
-//					int dx = x - startTouchMotionX; // 获得x方向移动距离
-//					mainLayout.startAnimation(new HP_AnimationUtils().animTranslate(lastTouchMotionX,
-//							x, 0, 0, 500));
-//					lastTouchMotionX = x;
-					
-//					if (dx != 0) {// 如果移动了
-//						doRotate(dx);// 做旋转
-//						if (degree > 90) {
-//							degree = 0;
-//							break;
-//						}
-//					} else {
-//						return false;
-//					}
-//					mLastMotionX = x;
+					mVelocityTracker.computeCurrentVelocity(1000, 1000);
+
+					int dx = x - startTouchMotionX; // 获得x方向移动距离
+
+					if (dx != 0) {// 如果移动了
+						if(lastTouchMotionX>=0){
+							mainLayout.startAnimation(new HP_AnimationUtils()
+							.animTranslate(lastTouchMotionX, dx<0?0:dx, 0, 0, 500));
+						}else{
+							mainLayout.startAnimation(new HP_AnimationUtils()
+							.animTranslate(0, 0, 0, 0, 500));
+							dx = 0;
+						}
+						
+					} else {
+						return false;
+					}
+					lastTouchMotionX = dx;
 					break;
 				case MotionEvent.ACTION_UP:
 					// 设置units的值为1000，意思为一秒时间内运动了多少个像素
